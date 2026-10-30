@@ -1,0 +1,389 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#183d32">
+  <title>Pumpkin Patch Party</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --forest: #183d32;
+      --forest-light: #315d4c;
+      --cream: #fff8e9;
+      --paper: #f3ead6;
+      --ink: #25392f;
+      --muted: #647269;
+      --orange: #e87932;
+      --orange-dark: #a64b25;
+      --gold: #f5bf54;
+      --line: #dfd4bc;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      min-width: 320px;
+      min-height: 100vh;
+      margin: 0;
+      background: var(--paper);
+      color: var(--ink);
+      font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+    }
+
+    .topbar {
+      min-height: 60px;
+      padding: 0 6vw;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      background: var(--forest);
+      color: var(--cream);
+    }
+
+    .brand {
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 17px;
+      font-weight: 700;
+    }
+
+    .season-tag {
+      color: #d7e3d6;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1.4px;
+      text-transform: uppercase;
+    }
+
+    main {
+      width: min(940px, calc(100% - 36px));
+      margin: 0 auto;
+      padding: 44px 0 36px;
+    }
+
+    .intro { text-align: center; }
+
+    h1 {
+      margin: 0;
+      color: var(--forest);
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 42px;
+      line-height: 1.1;
+    }
+
+    .intro p {
+      margin: 10px 0 28px;
+      color: var(--muted);
+      font-size: 16px;
+    }
+
+    .game-board {
+      padding: 26px 30px 22px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--cream);
+      box-shadow: 0 12px 30px rgb(52 54 37 / 9%);
+    }
+
+    .score-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .round-label {
+      color: var(--forest);
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .score {
+      display: flex;
+      align-items: baseline;
+      gap: 7px;
+    }
+
+    .score strong {
+      color: var(--orange-dark);
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 24px;
+    }
+
+    .score span {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .meter {
+      height: 9px;
+      margin: 12px 0 27px;
+      overflow: hidden;
+      border-radius: 10px;
+      background: #e9dfcc;
+    }
+
+    .meter-fill {
+      width: 0;
+      height: 100%;
+      border-radius: inherit;
+      background: var(--orange);
+      transition: width 350ms ease;
+    }
+
+    .pick-prompt {
+      margin: 0 0 14px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+      text-align: center;
+    }
+
+    .pumpkin-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .pumpkin-choice {
+      min-width: 0;
+      min-height: 194px;
+      padding: 12px 10px 14px;
+      border: 1px solid #e8dcc5;
+      border-radius: 7px;
+      background: #fff3dc;
+      color: var(--ink);
+      font: inherit;
+      cursor: pointer;
+      transition: background-color 140ms ease, border-color 140ms ease, transform 140ms ease;
+    }
+
+    .pumpkin-choice:hover:not(:disabled),
+    .pumpkin-choice:focus-visible {
+      transform: translateY(-3px);
+      border-color: var(--orange);
+      background: #ffe8c5;
+      outline: 3px solid rgb(232 121 50 / 22%);
+      outline-offset: 2px;
+    }
+
+    .pumpkin-choice:focus-visible { outline-style: solid; }
+    .pumpkin-choice:disabled { cursor: default; opacity: 0.62; }
+
+    .pumpkin-art {
+      display: block;
+      width: min(100%, 164px);
+      height: 126px;
+      margin: 0 auto 6px;
+      overflow: visible;
+    }
+
+    .pumpkin-body { fill: var(--pumpkin, #f28a36); stroke: var(--outline, #a64b25); }
+    .pumpkin-stem { fill: #527649; stroke: #315b3c; }
+    .pumpkin-face { fill: #493b2d; stroke: #493b2d; }
+
+    .pumpkin-name {
+      display: block;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .choice-one { --pumpkin: #ed8637; }
+    .choice-two { --pumpkin: #f29b43; }
+    .choice-three { --pumpkin: #e99a55; }
+    .choice-three .pumpkin-art { transform: scale(.88); }
+
+    .status {
+      min-height: 50px;
+      margin: 18px 0 12px;
+      display: grid;
+      place-items: center;
+      color: var(--forest);
+      font-size: 15px;
+      font-weight: 700;
+      line-height: 1.5;
+      text-align: center;
+    }
+
+    .actions { display: flex; justify-content: center; }
+
+    .restart {
+      min-height: 42px;
+      padding: 0 18px;
+      border: 0;
+      border-radius: 5px;
+      background: var(--forest);
+      color: #fff;
+      font: inherit;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .restart:hover, .restart:focus-visible { background: var(--forest-light); }
+    .restart:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
+
+    @media (max-width: 600px) {
+      .topbar { min-height: 54px; padding: 0 18px; }
+      .brand { font-size: 15px; }
+      .season-tag { font-size: 9px; letter-spacing: 1px; }
+      main { width: min(440px, calc(100% - 24px)); padding-top: 30px; }
+      h1 { font-size: 34px; }
+      .intro p { margin-bottom: 20px; font-size: 14px; }
+      .game-board { padding: 20px 15px 18px; }
+      .pumpkin-grid { gap: 7px; }
+      .pumpkin-choice { min-height: 154px; padding: 8px 4px 10px; }
+      .pumpkin-art { height: 104px; }
+      .pumpkin-name { font-size: 11px; }
+      .status { font-size: 14px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">Pumpkin Patch Party</div>
+    <div class="season-tag">A Halloween mini-game</div>
+  </header>
+
+  <main>
+    <section class="intro" aria-labelledby="page-title">
+      <h1 id="page-title">Pick a pumpkin</h1>
+      <p>Fifty turns. A little candy-filled surprise in every pick.</p>
+    </section>
+
+    <section class="game-board" aria-label="Pumpkin Patch Party game">
+      <div class="score-row">
+        <div class="round-label" id="round-label">Round 1 of 50</div>
+        <div class="score"><strong id="candy-score">0</strong><span>of 100 candies</span></div>
+      </div>
+      <div class="meter" role="progressbar" aria-label="Candies collected" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+        <div class="meter-fill" id="meter-fill"></div>
+      </div>
+
+      <p class="pick-prompt">Choose one:</p>
+      <div class="pumpkin-grid">
+        <button class="pumpkin-choice choice-one" data-choice="0" aria-label="Pick the jack-o'-lantern">
+          <svg class="pumpkin-art" viewBox="0 0 200 160" aria-hidden="true">
+            <path class="pumpkin-stem" stroke-width="3" d="M91 53 C89 39 94 27 105 23 C105 36 111 42 110 52 Z"/>
+            <ellipse class="pumpkin-body" stroke-width="4" cx="100" cy="101" rx="67" ry="51"/>
+            <ellipse class="pumpkin-body" stroke-width="3" cx="66" cy="100" rx="28" ry="47"/>
+            <ellipse class="pumpkin-body" stroke-width="3" cx="100" cy="98" rx="30" ry="54"/>
+            <ellipse class="pumpkin-body" stroke-width="3" cx="134" cy="100" rx="27" ry="47"/>
+            <circle class="pumpkin-face" cx="77" cy="91" r="5"/><circle class="pumpkin-face" cx="123" cy="91" r="5"/>
+            <path class="pumpkin-face" d="M100 98 L94 108 L102 108 Z"/>
+            <path d="M79 115 Q100 135 121 115" fill="none" stroke="#493b2d" stroke-width="4" stroke-linecap="round"/>
+          </svg>
+          <span class="pumpkin-name">Jack-o'-lantern</span>
+        </button>
+
+        <button class="pumpkin-choice choice-two" data-choice="1" aria-label="Pick the smiling pumpkin">
+          <svg class="pumpkin-art" viewBox="0 0 200 160" aria-hidden="true">
+            <path class="pumpkin-stem" stroke-width="3" d="M91 53 C89 39 94 27 105 23 C105 36 111 42 110 52 Z"/>
+            <ellipse class="pumpkin-body" stroke-width="4" cx="100" cy="101" rx="67" ry="51"/>
+            <ellipse class="pumpkin-body" stroke-width="3" cx="66" cy="100" rx="28" ry="47"/>
+            <ellipse class="pumpkin-body" stroke-width="3" cx="100" cy="98" rx="30" ry="54"/>
+            <ellipse class="pumpkin-body" stroke-width="3" cx="134" cy="100" rx="27" ry="47"/>
+            <circle class="pumpkin-face" cx="77" cy="91" r="5"/><circle class="pumpkin-face" cx="123" cy="91" r="5"/>
+            <path d="M81 111 Q100 130 119 111" fill="none" stroke="#493b2d" stroke-width="4" stroke-linecap="round"/>
+          </svg>
+          <span class="pumpkin-name">Smiling pumpkin</span>
+        </button>
+
+        <button class="pumpkin-choice choice-three" data-choice="2" aria-label="Pick the tiny pumpkin">
+          <svg class="pumpkin-art" viewBox="0 0 200 160" aria-hidden="true">
+            <path class="pumpkin-stem" stroke-width="3" d="M91 53 C89 39 94 27 105 23 C105 36 111 42 110 52 Z"/>
+            <ellipse class="pumpkin-body" stroke-width="4" cx="100" cy="101" rx="67" ry="51"/>
+            <ellipse class="pumpkin-body" stroke-width="3" cx="66" cy="100" rx="28" ry="47"/>
+            <ellipse class="pumpkin-body" stroke-width="3" cx="100" cy="98" rx="30" ry="54"/>
+            <ellipse class="pumpkin-body" stroke-width="3" cx="134" cy="100" rx="27" ry="47"/>
+            <circle class="pumpkin-face" cx="77" cy="91" r="5"/><circle class="pumpkin-face" cx="123" cy="91" r="5"/>
+            <path d="M82 112 Q100 126 118 112" fill="none" stroke="#493b2d" stroke-width="4" stroke-linecap="round"/>
+          </svg>
+          <span class="pumpkin-name">Tiny pumpkin</span>
+        </button>
+      </div>
+
+      <p class="status" id="status" aria-live="polite">Choose a pumpkin to see what's inside!</p>
+      <div class="actions"><button class="restart" id="restart">Start over</button></div>
+    </section>
+  </main>
+
+  <script>
+    const pumpkinButtons = [...document.querySelectorAll(".pumpkin-choice")];
+    const roundLabel = document.getElementById("round-label");
+    const candyScore = document.getElementById("candy-score");
+    const meter = document.querySelector(".meter");
+    const meterFill = document.getElementById("meter-fill");
+    const status = document.getElementById("status");
+    const restartButton = document.getElementById("restart");
+
+    async function request(path, data) {
+      const response = await fetch(path, {
+        method: data ? "POST" : "GET",
+        headers: data ? { "Content-Type": "application/json" } : {},
+        body: data ? JSON.stringify(data) : undefined,
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || "Something went wrong.");
+      return result;
+    }
+
+    function render(game) {
+      roundLabel.textContent = game.finished ? "All 50 rounds complete" : `Round ${game.round + 1} of 50`;
+      candyScore.textContent = game.candy;
+      meter.setAttribute("aria-valuenow", game.candy);
+      meterFill.style.width = `${Math.min(game.candy / 100 * 100, 100)}%`;
+      pumpkinButtons.forEach((button) => { button.disabled = game.finished; });
+
+      if (game.finished) {
+        status.textContent = game.won
+          ? `You collected ${game.candy} candies. You win the Pumpkin Patch Party!`
+          : `You collected ${game.candy} candies. Thanks for playing, Halloween helper!`;
+        restartButton.textContent = "Play again";
+      } else if (game.last_reward) {
+        const reward = game.last_reward;
+        const surprise = reward === 1
+          ? "A friendly ghost found 1 candy for you!"
+          : reward === 2
+            ? "A happy bat brought you 2 candies!"
+            : "A silly skeleton tossed you 3 candies!";
+        status.textContent = `${surprise} Pick another pumpkin!`;
+        restartButton.textContent = "Start over";
+      } else {
+        status.textContent = "Choose a pumpkin to see what's inside!";
+        restartButton.textContent = "Start over";
+      }
+    }
+
+    pumpkinButtons.forEach((button) => {
+      button.addEventListener("click", async () => {
+        pumpkinButtons.forEach((choice) => { choice.disabled = true; });
+        try {
+          render(await request("/api/pick", { choice: Number(button.dataset.choice) }));
+        } catch (error) {
+          status.textContent = error.message;
+          pumpkinButtons.forEach((choice) => { choice.disabled = false; });
+        }
+      });
+    });
+
+    restartButton.addEventListener("click", async () => {
+      restartButton.disabled = true;
+      try {
+        render(await request("/api/new-game", {}));
+      } catch (error) {
+        status.textContent = error.message;
+      } finally {
+        restartButton.disabled = false;
+      }
+    });
+
+    request("/api/state").then(render).catch((error) => { status.textContent = error.message; });
+  </script>
+</body>
+</html>
